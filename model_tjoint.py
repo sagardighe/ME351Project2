@@ -13,6 +13,18 @@ dT = 0.005 #delta time (s)
 Atank = 0.32 * 0.26
 ###################################################################################################
 
+def getDWeighted(L):
+	tubeWeight = L / (L+0.04)
+	tJointWeight = 0.04 / (L+0.04)
+
+	return tubeWeight * dP + tJointWeight * dTJ
+
+def getVWeighted(vP, vTJ):
+	tubeWeight = L / (L+0.04)
+	tJointWeight = 0.04 / (L+0.04)
+
+	return tubeWeight * vP + tJointWeight * vTJ
+
 def getRe(v, d):
 	return (rho*v*d)/mu
 
@@ -24,7 +36,11 @@ def findVTPipe(L, fp, ft, wL):
 	#return math.sqrt((-2*g*(wL - 0.02 + L / 150))/(0.805 - L/(0.03176*fp) - 5.85e-2*ft))
 	#print(fp,ft)
 	#return math.sqrt((2*g*(wL - 0.02 + L / 150))/(125.945 * L * fp + 0.2341 * ft - 0.305))
-	return (118816*math.sqrt(g*(0.00666667*L+wL-0.02)))/(math.sqrt(889000000000*fp*L + 1652155200*ft - 2611351267))
+	#return (118816*math.sqrt(g*(0.00666667*L+wL-0.02)))/(math.sqrt(889000000000*fp*L + 1652155200*fp - 2611351267))
+	D = getDWeighted(L)
+	V = getVWeighted()
+	
+	return (0.13424 * sqrt(6 * D * g**2 - 2 * D * L * g**2 - 300 * D * w * g**2 + 3 * f * V**2 + 75 * f * L * V**2)) / (sqrt(D) * sqrt(g))
 
 def findFTPipeLammy(fguessPipe, fguessTJoint, waterlevel, L):
 	fPipe = fguessPipe
@@ -58,22 +74,33 @@ def findFTPipeTurbo(fguessPipe, fguessTJoint, waterlevel, L):
 	fTJ = fguessTJoint
 	fPipeOld = 8340983406
 	fTJOld = 9384093460
+	fW = fguessPipe
+	fWOld = 8345983459834
 
-	while (abs(fPipe - fPipeOld) > 0.001 and abs(fTJ - fTJOld) > 0.001):
+	while(abs(fW - fWOld) > 0.001):
+	#while (abs(fPipe - fPipeOld) > 0.001 and abs(fTJ - fTJOld) > 0.001):
 		fPipeOld = fPipe
 		fTJOld = fTJ
 		vPipe = findVTPipe(L, fPipe, fTJ, waterlevel)
 		vTJ = 0.255 * vPipe
-		RePipe = getRe(vPipe, dP)
-		ReTJ = getRe(vTJ, dTJ)
+		dWeighted = getDWeighted(L)
+		vWeighted = getVWeighted(vPipe, vTJ)
+		ReWeighted = getRe(vWeighted, dWeighted)
 
-		dataP = tuple([RePipe, dP])
-		xP = fsolve(fEq, 0, args=dataP)[0]
-		fPipe = (1/xP)**2
+		# RePipe = getRe(vPipe, dP)
+		# ReTJ = getRe(vTJ, dTJ)
 
-		dataTJ = tuple([ReTJ, dTJ])
-		xTJ = fsolve(fEq, 0, args=dataTJ)[0]
-		fTJ = (1/xTJ)**2
+		#dataP = tuple([RePipe, dP])
+		dataWeighted = tuple([ReWeighted, dWeighted])
+		# xP = fsolve(fEq, 0, args=dataP)[0]
+		# fPipe = (1/xP)**2
+
+		# dataTJ = tuple([ReTJ, dTJ])
+		# xTJ = fsolve(fEq, 0, args=dataTJ)[0]
+		# fTJ = (1/xTJ)**2
+
+		xW = fsolve(fEw, 0, args=dataWeighted)[0]
+		fW = (1/xW)**2
 
 	# while (abs(fTJ - fTJOld) > 0.0001):
 	# 	fTJOld = fTJ
@@ -88,7 +115,7 @@ def findFTPipeTurbo(fguessPipe, fguessTJoint, waterlevel, L):
 	return fPipe, vPipe, RePipe, fTJ, vTJ, ReTJ
 
 def main():
-	L = 0.2 #m
+	L = 0.4 #m
 
 	while(L <= 1.01):
 		WL = 0.1
@@ -98,7 +125,7 @@ def main():
 		ReOld = 57609456
 
 		while(WL > 0.02):
-			if (ReOld > 2300):
+			if (ReOld > 3150):
 				fP, vP, ReP, fTJ, vTJ, ReTJ = findFTPipeTurbo(fgp, fgtj, WL, L)
 
 			else:

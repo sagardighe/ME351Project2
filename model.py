@@ -20,18 +20,7 @@ def fEq(x, *data):
 	return x + 2 * math.log((eps/d/3.7) + (2.51/Re) * x)
 
 def findV(L, f, wL):
-	return math.sqrt((2*g*(wL - 0.02 + L / 150)) / (0.5 + L * f / d))
-
-
-def findFTPipe(fguessPipe, fguessTJoint, waterlevel, L):
-	fPipe = fguessPipe
-	fTJ = fguessTJoint
-
-	while (abs(fPipe - fPipeOld) > 0.0001 and abs(fTJ - fTJOld) > 0.0001):
-		fPipeOld = fPipe
-
-def findVTPipe(L, f, wL):
-	return math.sqrt((-2*g*())/())
+	return math.sqrt((2*g*(wL + L / 150)) / (0.75 + L * f / d))
 
 def findFTurbo(fguess, waterLevel, L):
 	f = fguess
