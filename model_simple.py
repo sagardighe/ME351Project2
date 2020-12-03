@@ -22,20 +22,6 @@ def fEq(x, *data):
 def findV(L, f, wL):
 	return math.sqrt((2*g*(wL + L / 150)) / (0.5 + L * f / d))
 
-def findFTurbo(fguess, waterLevel, L):
-	f = fguess
-	fold = 98465904856
-
-	while (abs(f - fold) > 0.0001):
-		fold = f
-		v = findV(L, f, waterLevel)
-		Re = getRe(v)
-
-		data = tuple([Re])
-		x = fsolve(fEq, 0, args=data)[0]
-		f = (1/x)**2
-
-	return f, v, Re
 
 def findFLammy(fguess, waterLevel, L):
 	f = fguess
@@ -50,7 +36,7 @@ def findFLammy(fguess, waterLevel, L):
 	return f, v, Re
 
 def main():
-	L = 0.3 #m
+	L = 0.01 #m
 
 	while(L <= 1.001):
 		WL = 0.1
@@ -59,11 +45,7 @@ def main():
 		ReOld = 57609456
 
 		while(WL > 0.02):
-			if (ReOld > 2300):
-				f, v, Re = findFTurbo(fguess, WL, L)
-
-			else:
-				f, v, Re = findFLammy(fguess, WL, L)
+			f, v, Re = findFLammy(fguess, WL, L)
 
 			q = v * math.pi * (d/2)**2
 			WL = WL - (q * dT) / Atank
@@ -72,7 +54,7 @@ def main():
 			#print(f, v, q, WL, Re)
 
 		print("Length: ", L, "Time: ", t)
-		L = L + 0.05
+		L = L + 0.01
 
 
 main()
