@@ -107,7 +107,7 @@ def main():
 	L = 0.05 #m
 
 	#test pipe lengths between 5cm and 1m inclusive, in increments of 5cm
-	while(L <= 1.001):
+	while(L <= 1.0):
 		WL = 0.1
 		fgp = 0.019
 		t = 0
@@ -118,10 +118,10 @@ def main():
 			#check the previous Reynold's number to see whether our flow is transitioning from laminar to turbulent
 			#and use the appropriate findF function
 			if (ReOld > 2300):
-				fP, vP, ReP = findFTPipeTurbo(fgp, WL, L)
+				fP, vP, ReP, fTJ, vTJ, ReTJ = findFTPipeTurbo(fgp, fgp, WL, L)
 
 			else:
-				fP, vP, ReP = findFTPipeLammy(fgp, WL, L)
+				fP, vP, ReP, fTJ, vTJ, ReTJ = findFTPipeLammy(fgp, fgp, WL, L)
 
 			q = vP * math.pi * (dP/2)**2 #volumetric flow rate
 			WL = WL - (q * dT) / Atank #update water level for this iteration

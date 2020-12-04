@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> comments
 from scipy.optimize import fsolve
 import math
 
